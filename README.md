@@ -34,8 +34,10 @@ Stata command to create duration variable with binary cross-sectional time serie
 
 More information is available in the help file.
 
-## Install
+## Working Paper
+You can see more details in the [working paper here](https://github.com/andyphilips/mkduration/blob/master/Philips-mkduration%20paper.pdf)
 
+## Install
 You can install `mkduration` directly from GitHub if you're connected to the internet:
 ```
 capture ado uninstall mkduration
@@ -44,4 +46,4 @@ net install mkduration, from(https://github.com/andyphilips/mkduration/raw/maste
 Alternatively, you can download the files from the source folder and either call directly to the .ado files or place them in your "ado/plus/" folder.
 
 ## Version
-Version 1.0.1, October 18, 2019
+Version 1.0.3, February 17, 2020
