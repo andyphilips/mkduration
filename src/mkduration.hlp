@@ -1,11 +1,11 @@
 {smcl}
-{* *! version 1.0.1 17oct2019}{...}
+{* *! version 1.0.3 16oct2020}{...}
 {viewerjumpto "Title" "mkduration##title"}{...}
 {viewerjumpto "Syntax" "mkduration##syntax"}{...}
 {viewerjumpto "Description" "mkduration##description"}{...}
 {viewerjumpto "Options" "mkduration##options"}{...}
 {viewerjumpto "Author" "mkduration##author"}{...}
-{viewerjumpto "Citations" "mkduration##citations"}
+{viewerjumpto "References" "mkduration##references"}
 {viewerjumpto "Examples" "mkduration##examples"}{...}
 {viewerjumpto "Version" "mkduration##version"}{...}
 {cmd:help mkduration}
@@ -22,13 +22,16 @@
 
 {p 8 15 2}
 {cmdab:mkduration}
-eventvar{cmd:,} {opt dname()} {opt force}
+eventvar{cmd:,} [{opt dname()} {opt force} {opt polynomial} {opt spline()} {opt nknots()}]
 
 {synoptset 20 tabbed}{...}
 {synopthdr}
 {synoptline}
 {p2coldent: {opt dname()}}optional name for created duration variable{p_end}
 {p2coldent: {opt force}}force creation of duration over gaps in time{p_end}
+{p2coldent: {opt polynomial}}generate cubic polynomial terms{p_end}
+{p2coldent: {opt spline()}}generate a linear or restricted cubic spline{p_end}
+{p2coldent: {opt nknots()}}specify number of knots if using spline{p_end}
 {synoptline}
 {p2colreset}{...}
 {p 4 6 2}
@@ -94,6 +97,15 @@ Data must be xtset to use {cmd:mkduration}, and a single dichotomous event varia
             2 {col 20}5 {col 27} 0 {col 40} . {col 58} 3
             2 {col 20}6 {col 27} 0 {col 40} . {col 58} 4
 
+{phang}
+{opt polynomial} is an option to automatically create duration, duration squared, and duration cubed (i.e., creates a cubic polynomial to proxy for duration dependence). The three resulting variables will be named "dname" (whatever the user selects for the duration name, or "duration" by default), "dname2" and "dname3".
+
+{phang}
+{opt spline()} is an option to create either a piecewise linear spline, by specifying {opt spline(linear)}, or a restricted cubic spline, by specifying {opt spline(cubic)}. The resulting spline variables will include a "_spl1", "_spl2" (and so on) suffix. Linear splines will be split into equal segments based on percentiles of the distribution, which can be adjusted using the number of knots. Cubic splines are also placed along the percentiles of the distribution as recommended by Harrel Jr (2015). By default, 5 knots are included.
+
+{phang}
+{opt nknots()} is an option, when creating splines, to control the number of knots included. By default, 5 knots are included, but this can range from 3 to 7. 
+
 {marker author}{...}
 {title:Author}
 
@@ -103,6 +115,13 @@ Department of Political Science {break}
 University of Colorado Boulder {break}
 andrew.philips@colorado.edu {p_end}
 
+{marker references}{...}
+{title:References}
+
+{pstd}
+Harrell Jr, Frank E. 2015. Regression modeling strategies: with applications to linear models, logistic and ordinal regression, and survival analysis. Springer.
+
+
 {marker examples}{...}
 {title:Examples}
 
@@ -110,11 +129,13 @@ andrew.philips@colorado.edu {p_end}
 {phang2}{cmd:. xtset}{p_end}
 {phang2}{cmd:. mkduration union}{p_end}
 
-{pstd}Forcing duration over any time gaps and renaming duration variable:{p_end}
-{phang2}{cmd:. mkduration union, force dname(dvar)}{p_end}
+{pstd}Forcing duration over any time gaps, renaming duration variable, and creating cubic polynomial:{p_end}
+{phang2}{cmd:. mkduration union, force dname(dvar) polynomial}{p_end}
 
+{pstd}Create linear spline with 4 knots:{p_end}
+{phang2}{cmd:. mkduration union, spline(linear) nknots(4)}{p_end}
 
 {marker version}{...}
 {title:Version}
 {pstd}
-version 1.0.1, Oct 17, 2019.{p_end}
+version 1.0.3, Feb 16, 2020.{p_end}
