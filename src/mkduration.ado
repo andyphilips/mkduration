@@ -1,17 +1,16 @@
 *		PROGRAM MKDURATION
 *		
-*		version 1.0.3
+*		version 1.0.4
 *		Andrew Q. Philips
 *		description: program to create duration variable using CSTS data
-*		2/16/20
+*		4/21/20
 *
 * -------------------------------------------------------------------------
 * -------------------------------------------------------------------------
 * -------------------------------------------------------------------------
-
 capture program drop mkduration
 capture program define mkduration
-syntax [varlist], [force dname(string) POLYnomial spline(string) nknots(string)]
+syntax [varlist], [dname(string) spline(string) nknots(string) strict force rfill lfill]
 
 version 8
 
@@ -32,16 +31,9 @@ if "`n_vars'" == "1" {
 	if _rc != 0 {
 		di in r _n "duration variable is not [0,1] dichotomous"
 	}
-
 }
 else {
-	di in r _n "only a single duration variable can be specified"
-	exit 198
-}
-
-* is either polynomial or spline set? Optional
-if "`polynomial'" != "" & "`spline'" != "" {
-	di in r _n "either polynomial or spline can be specified, not both"
+	di in r _n "a single duration variable must be specified"
 	exit 198
 }
 
@@ -68,35 +60,68 @@ if "`nknots'" != "" {
 	}
 } 
 
-* create duration:
-if "`dname'" == "" {
-	loc dname = "duration"
-}
-cap drop `dname'
-qui gen `dname' = 0
-if "`force'" != "" { // force over duration gaps?
-	qui bysort `panelvar': replace `dname' = cond((l.`varlist' == 1)| _n == 1, 1, `dname'[_n-1] + (`timevar' - `timevar'[_n-1]))
-}
-else {
-	qui bysort `panelvar': replace `dname' = cond((l.`varlist' == 1)| _n == 1, 1, l.`dname' + 1) // if/else command; replace duration = 1 the time after event, else d + 1
+* if l/rfill is specified, force must be too:
+if "`lfill'" != "" | "`rfill'" != "" {
+	if "`force'" == "" {
+		di in r _n "force must also be specified if lfill or rfill are specified"
+		exit 198
+	}
 }
 
-* create polynomials (optional):
-qui if "`polynomial'" != "" {
-	cap drop `dname'2 `dname'3
-	gen `dname'2 = `dname'*`dname'
-	gen `dname'3 = `dname'*`dname'*`dname'
+* if strict is specified, force (and l/rfill) can't be:
+if "`strict'" != "" {
+	if "`force'" != "" {
+		di in r _n "force cannot be specified with strict"
+		exit 198
+	}
+}
+
+* create duration:
+if "`dname'" == "" {
+	loc dname = "__duration"
+}
+qui gen `dname' = 0
+
+qui if "`strict'" != "" { // strict fill
+	bysort `panelvar': replace `dname' = cond((l.`varlist' == 1), cond(l.`varlist' != ., 1, .), cond(l.`varlist' != ., l.`dname' + 1, .))
+}
+qui else if "`force'" != "" { // force over duration gaps? 4 conditions:
+	if "`lfill'" != "" & "`rfill'" != "" { // both left and right fill
+		bysort `panelvar': replace `dname' = cond((l.`varlist' == 1) | (_n == 1), 1, `dname'[_n-1] + (`timevar' - `timevar'[_n-1]))
+	}
+	else if "`lfill'" != "" { // left fill only
+		bysort `panelvar': replace `dname' = cond((l.`varlist' == 1) | (_n == 1), 1, `dname'[_n-1] + (`timevar' - `timevar'[_n-1]))
+		tempvar __tag__
+		bysort `panelvar': egen `__tag__' = max(cond(`varlist' != ., `timevar', .))
+		bysort `panelvar': replace `dname' = . if `timevar' > (`__tag__' + 1)
+	}
+	else if "`rfill'" != "" { // right fill only
+		tempvar __obs__
+		bysort `panelvar': gen `__obs__' = sum(!missing(`varlist')) if !missing(`varlist')
+		bysort `panelvar': replace `dname' = cond((l.`varlist' == 1) | (`__obs__' == 1), 1, `dname'[_n-1] + (`timevar' - `timevar'[_n-1]))
+	}
+	else { // just force only
+		tempvar __obs__
+		bysort `panelvar': gen `__obs__' = sum(!missing(`varlist')) if !missing(`varlist')
+		bysort `panelvar': replace `dname' = cond((l.`varlist' == 1) | (`__obs__' == 1), 1, `dname'[_n-1] + (`timevar' - `timevar'[_n-1]))
+		tempvar __tag__
+		bysort `panelvar': egen `__tag__' = max(cond(`varlist' != ., `timevar', .))
+		bysort `panelvar': replace `dname' = . if `timevar' > (`__tag__' + 1)
+	}
+}
+qui else { // regular fill
+	tempvar __obs__
+	bysort `panelvar': gen `__obs__' = sum(!missing(`varlist')) if !missing(`varlist')
+	bysort `panelvar': replace `dname' = cond((l.`varlist' == 1) | (`__obs__' == 1), cond(l.`varlist' != . | `__obs__' == 1, 1, .), cond(l.`varlist' != ., l.`dname' + 1, .))
 }
 
 * create spline (optional):
-if "`spline'" != "" {
+qui if "`spline'" != "" {
 	if "`spline'" == "linear" {
-		cap drop `dname'_spl
 		loc nkplus1 = `nknots' + 1 // linear spline needs number of splits, not knots
 		mkspline `dname'_spl `nkplus1' = `dname', pctile displayknots
 	}
 	else { // cubic spline
-		cap drop `dname'_spl
 		mkspline `dname'_spl = `dname', cubic nknots(`nknots') displayknots
 	}
 }

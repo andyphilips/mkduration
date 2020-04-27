@@ -1,4 +1,4 @@
-v 1.0.4
+v 1.0.3
 d Andrew Q. Philips, University of Colorado Boulder (andrew.philips@colorado.edu)
 p mkduration MKDURATION - Stata command to create duration variable with binary cross-sectional time series data
 

@@ -1,4 +1,4 @@
-v 1.0.4
+v 1.0.3
 
 d Andrew Q. Philips, University of Colorado Boulder (andrew.philips@colorado.edu)
 d
@@ -8,7 +8,7 @@ d
 d
 d Requires: Stata version 8 or newer
 d
-d Distribution-Date: 04-21-2020
+d Distribution-Date: 03-17-2020
 d
 
 f mkduration.ado

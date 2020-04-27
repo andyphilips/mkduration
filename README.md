@@ -46,4 +46,4 @@ net install mkduration, from(https://github.com/andyphilips/mkduration/raw/maste
 Alternatively, you can download the files from the source folder and either call directly to the .ado files or place them in your "ado/plus/" folder.
 
 ## Version
-Version 1.0.3, February 17, 2020
+Version 1.0.4, April 27, 2020
