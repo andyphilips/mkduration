@@ -37,7 +37,8 @@ More information is available in the help file.
 ## Examples and Citing
 You can see more details in the [Stata Journal article](https://journals.sagepub.com/doi/10.1177/1536867X20976322), or the [ungated version](https://github.com/andyphilips/mkduration/blob/master/Philips-2020-SJ.pdf).
 
-If you use `mkduration` in your own work, I'd love it if you cited me: Philips, Andrew Q. 2020. "An easy way to create duration variables in binary cross-sectional time series data." The Stata Journal 20(4): 916-930.
+If you use `mkduration` in your own work, I'd love it if you cited me: 
+* Philips, Andrew Q. 2020. "An easy way to create duration variables in binary cross-sectional time series data." The Stata Journal 20(4): 916-930.
 
 
 ## Install
